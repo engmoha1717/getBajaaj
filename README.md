@@ -1,56 +1,72 @@
-# Welcome to your Expo app 👋
+# getBajaaj — GetBajaaj Mobile (Rider + Driver)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo (Expo Router, TypeScript) app. Phase 1: project scaffolding and a
+single placeholder home screen only — no auth screens, no ride logic, no
+database queries yet.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- Expo SDK 57, Expo Router (file-based routing), TypeScript
+- NativeWind v4 (Tailwind CSS v3 under the hood) — `dark:` variants follow
+  the OS color scheme automatically
+- Clerk (`@clerk/expo`) — provider wired with a SecureStore-backed token
+  cache, no sign-in/sign-up UI yet
+- TanStack React Query (`QueryClientProvider` wired in the root layout, no
+  queries fired yet)
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Environment variables
 
-### Other setup steps
+Copy `.env.example` to `.env` and fill in a real value:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Variable | Where to get it |
+|---|---|
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | [Clerk dashboard](https://dashboard.clerk.com/~/api-keys) — same Clerk application as `bajaaj/` (the web app); one Clerk app, two client SDKs |
 
-## Learn more
+Expo only exposes env vars prefixed `EXPO_PUBLIC_` to client code — never
+put a secret key in this app.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Run
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start        # then press `w` for web, or scan the QR code for
+                       # a device/simulator via Expo Go
+npx expo start --web  # web preview directly
+```
 
-## Join the community
+The home screen shows the GetBajaaj brand, tagline, and a "Get Started"
+button (no navigation wired yet), and responds to system light/dark mode.
 
-Join our community of developers creating universal apps.
+## Notes on this stack (Expo SDK 57)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This repo pulled in a very recent Expo SDK with real breaking changes from
+older tutorials/training data:
+
+- **`src/app/`, not `app/`**: `create-expo-app`'s current default template
+  roots Expo Router at `src/app/` (see `tsconfig.json`'s `@/*` → `./src/*`
+  alias). Expo Router auto-detects this — no extra config needed.
+- **Clerk package renamed**: `@clerk/clerk-expo` is deprecated in favor of
+  `@clerk/expo` (Core 3). `publishableKey` must now be passed explicitly
+  to `ClerkProvider` (not just read from env internally) — see
+  `src/app/_layout.tsx`. The SecureStore token cache import moved to
+  `@clerk/expo/token-cache`.
+- **NativeWind v4 targets Tailwind CSS v3**, not v4 — `tailwindcss` is
+  pinned to `^3.4.17` in `package.json` on purpose.
+
+## Project structure
+
+```
+src/
+  app/
+    _layout.tsx   Root layout — Clerk, React Query, NativeWind CSS import
+    index.tsx     Home screen
+  global.css      Tailwind directives (loaded via metro.config.js)
+babel.config.js    nativewind/babel + jsxImportSource
+metro.config.js    withNativeWind(...)
+tailwind.config.js content: ["./src/**/*.{js,jsx,ts,tsx}"], darkMode: "media"
+```
