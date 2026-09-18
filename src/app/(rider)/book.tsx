@@ -1,44 +1,19 @@
-import { useAuth } from "@clerk/expo";
-import * as Location from "expo-location";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 
 import { useCreateRide } from "@/lib/useCreateRide";
+import { useCurrentLocation } from "@/lib/useCurrentLocation";
 
 // Flat placeholder — real fare needs real distance, which needs real
 // dropoff coordinates (see the comment on dropoffLat/dropoffLng below).
 const PLACEHOLDER_FARE = 90;
 
-export default function RiderHome() {
-  const { signOut } = useAuth();
+export default function BookRide() {
   const createRide = useCreateRide();
-
-  const [pickupAddress, setPickupAddress] = useState("");
-  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [locating, setLocating] = useState(true);
+  const { address: pickupAddress, setAddress: setPickupAddress, coords: pickupCoords, loading: locating } =
+    useCurrentLocation();
   const [dropoffAddress, setDropoffAddress] = useState("");
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setLocating(false);
-        return;
-      }
-
-      const position = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = position.coords;
-      setPickupCoords({ lat: latitude, lng: longitude });
-
-      const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
-      if (place) {
-        const parts = [place.name, place.street, place.city].filter(Boolean);
-        setPickupAddress(parts.join(", "));
-      }
-      setLocating(false);
-    })();
-  }, []);
 
   const canSubmit = pickupAddress.trim().length > 0 && dropoffAddress.trim().length > 0;
 
@@ -124,10 +99,6 @@ export default function RiderHome() {
             REQUEST RIDE
           </Text>
         )}
-      </Pressable>
-
-      <Pressable onPress={() => signOut()} className="items-center py-2">
-        <Text className="font-jakarta-medium text-sm text-muted">Sign out</Text>
       </Pressable>
     </View>
   );

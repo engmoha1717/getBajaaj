@@ -32,7 +32,7 @@ export default function RideStatus() {
           Ride cancelled
         </Text>
         <Pressable
-          onPress={() => router.replace("/(rider)")}
+          onPress={() => router.replace("/(rider)/(tabs)")}
           className="rounded-full bg-[#FFB800] px-8 py-4 active:opacity-80"
         >
           <Text className="text-base font-semibold text-[#271900]">Request another ride</Text>
