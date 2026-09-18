@@ -90,7 +90,17 @@ export default function RiderHome() {
             </Text>
           </>
         ) : (
-          <Text className="font-jakarta-bold text-sm text-muted">List view — coming soon</Text>
+          <View className="items-center px-8">
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+              <MaterialIcons name="electric-rickshaw" size={24} color="#6B7280" />
+            </View>
+            <Text className="mt-3 font-jakarta-bold text-sm text-muted">
+              No drivers nearby yet
+            </Text>
+            <Text className="mt-1 text-center font-jakarta-medium text-xs text-muted">
+              We're still onboarding drivers in your area — check back soon.
+            </Text>
+          </View>
         )}
       </View>
 
