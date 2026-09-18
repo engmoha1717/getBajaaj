@@ -35,7 +35,13 @@
       ],
       "expo-secure-store",
       "@clerk/expo",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermissionText": "GetBajaaj uses your location to find your pickup point."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

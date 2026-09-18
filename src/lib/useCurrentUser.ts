@@ -1,6 +1,8 @@
 import { useAuth } from "@clerk/expo";
 import { useQuery } from "@tanstack/react-query";
 
+import { apiFetch } from "@/lib/api";
+
 export type CurrentUser = {
   role: "RIDER" | "DRIVER" | "ADMIN";
   hasDriverProfile: boolean;
@@ -12,13 +14,6 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: ["me"],
     enabled: isSignedIn,
-    queryFn: async (): Promise<CurrentUser> => {
-      const token = await getToken();
-      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to load current user");
-      return res.json();
-    },
+    queryFn: async () => apiFetch<CurrentUser>("/api/me", await getToken()),
   });
 }
