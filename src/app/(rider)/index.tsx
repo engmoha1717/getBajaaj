@@ -60,58 +60,54 @@ export default function RiderHome() {
   }
 
   return (
-    <View className="flex-1 gap-6 bg-white px-6 pt-20 dark:bg-neutral-950">
+    <View className="flex-1 gap-6 bg-surface px-4 pt-20">
       <View className="gap-1">
-        <Text className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">
+        <Text className="font-jakarta-extrabold text-[28px] leading-9 tracking-tight text-ink">
           Where to?
         </Text>
-        <Text className="text-base text-neutral-500 dark:text-neutral-400">
+        <Text className="font-jakarta-medium text-sm text-muted">
           Enter your pickup and drop-off to request a ride.
         </Text>
       </View>
 
-      <View className="gap-3">
-        <View className="gap-1.5">
-          <Text className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-            Pickup
-          </Text>
-          <View className="flex-row items-center gap-2 rounded-2xl border border-neutral-200 px-4 py-3 dark:border-neutral-800">
-            {locating && <ActivityIndicator size="small" />}
-            <TextInput
-              value={pickupAddress}
-              onChangeText={setPickupAddress}
-              placeholder={locating ? "Finding your location…" : "Pickup address"}
-              placeholderTextColor="#9ca3af"
-              className="flex-1 text-base text-neutral-900 dark:text-neutral-50"
-            />
-          </View>
+      <View className="rounded-3xl border border-divider bg-card px-4 py-2 shadow-sm">
+        <View className="flex-row items-center gap-3 py-3">
+          <View className="h-2.5 w-2.5 rounded-full bg-accent" />
+          <TextInput
+            value={pickupAddress}
+            onChangeText={setPickupAddress}
+            placeholder={locating ? "Finding your location…" : "Pickup address"}
+            placeholderTextColor="#6B7280"
+            className="flex-1 font-jakarta-semibold text-base text-ink"
+          />
+          {locating && <ActivityIndicator size="small" color="#121212" />}
         </View>
 
-        <View className="gap-1.5">
-          <Text className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-            Drop-off
-          </Text>
-          <View className="rounded-2xl border border-neutral-200 px-4 py-3 dark:border-neutral-800">
-            <TextInput
-              value={dropoffAddress}
-              onChangeText={setDropoffAddress}
-              placeholder="Where are you going?"
-              placeholderTextColor="#9ca3af"
-              className="text-base text-neutral-900 dark:text-neutral-50"
-            />
-          </View>
+        <View className="ml-[4.5px] h-4 border-l border-dashed border-divider" />
+
+        <View className="h-px bg-divider" />
+
+        <View className="flex-row items-center gap-3 py-3">
+          <View className="h-2.5 w-2.5 rotate-45 bg-danger" />
+          <TextInput
+            value={dropoffAddress}
+            onChangeText={setDropoffAddress}
+            placeholder="Where are you going?"
+            placeholderTextColor="#6B7280"
+            className="flex-1 font-jakarta-semibold text-base text-ink"
+          />
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between rounded-2xl bg-neutral-100 px-4 py-3 dark:bg-neutral-900">
-        <Text className="text-sm text-neutral-500 dark:text-neutral-400">Estimated fare</Text>
-        <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-50">
+      <View className="flex-row items-center justify-between rounded-2xl border border-divider bg-card px-4 py-3">
+        <Text className="font-jakarta-medium text-sm text-muted">Estimated fare</Text>
+        <Text className="font-jakarta-extrabold text-2xl tracking-tight text-ink">
           ₹{PLACEHOLDER_FARE}
         </Text>
       </View>
 
       {createRide.isError && (
-        <Text className="text-sm text-red-600 dark:text-red-400">
+        <Text className="font-jakarta-medium text-sm text-danger">
           {createRide.error instanceof Error ? createRide.error.message : "Something went wrong."}
         </Text>
       )}
@@ -119,19 +115,19 @@ export default function RiderHome() {
       <Pressable
         onPress={handleRequestRide}
         disabled={!canSubmit || createRide.isPending}
-        className="rounded-full bg-[#FFB800] px-8 py-4 active:opacity-80 disabled:opacity-40"
+        className="h-14 items-center justify-center rounded-full bg-ink active:opacity-80 disabled:opacity-40"
       >
         {createRide.isPending ? (
-          <ActivityIndicator color="#271900" />
+          <ActivityIndicator color="#FFB800" />
         ) : (
-          <Text className="text-center text-base font-semibold text-[#271900]">
-            Request ride
+          <Text className="font-jakarta-bold text-base tracking-wide text-white">
+            REQUEST RIDE
           </Text>
         )}
       </Pressable>
 
       <Pressable onPress={() => signOut()} className="items-center py-2">
-        <Text className="text-sm text-neutral-500 dark:text-neutral-400">Sign out</Text>
+        <Text className="font-jakarta-medium text-sm text-muted">Sign out</Text>
       </Pressable>
     </View>
   );
