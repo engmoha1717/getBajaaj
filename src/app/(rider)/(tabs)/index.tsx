@@ -1,3 +1,4 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -17,12 +18,28 @@ export default function RiderHome() {
 
   return (
     <View className="flex-1 bg-surface">
-      <View className="flex-row items-center justify-between px-4 pb-3 pt-16">
-        <View className="flex-1 pr-3">
-          <Text className="font-jakarta-medium text-xs text-muted">Current location</Text>
-          <Text numberOfLines={1} className="font-jakarta-bold text-base text-ink">
-            {loading ? "Finding you…" : address || "Location unavailable"}
-          </Text>
+      <View className="flex-row items-center justify-between gap-3 px-4 pb-3 pt-16">
+        <View className="flex-1 flex-row items-center gap-3">
+          <Image
+            source={require("../../../../assets/images/rickshaw-logo.png")}
+            style={{ width: 32, height: 32, borderRadius: 8 }}
+          />
+          <View className="flex-1">
+            <View className="flex-row items-center gap-1.5">
+              <Text className="font-jakarta-bold text-base text-ink">RickshawGo</Text>
+              <View className="rounded-full bg-primary px-2 py-0.5">
+                <Text className="font-jakarta-extrabold text-[10px] tracking-wider text-ink">
+                  BLR
+                </Text>
+              </View>
+            </View>
+            <View className="flex-row items-center gap-1">
+              <MaterialIcons name="location-on" size={13} color="#008744" />
+              <Text numberOfLines={1} className="flex-1 font-jakarta-medium text-xs text-muted">
+                {loading ? "Finding you…" : address || "Location unavailable"}
+              </Text>
+            </View>
+          </View>
         </View>
 
         <Pressable onPress={() => router.push("/(rider)/(tabs)/profile")}>
@@ -39,17 +56,24 @@ export default function RiderHome() {
         </Pressable>
       </View>
 
-      <View className="flex-row self-start rounded-full border border-divider bg-card mx-4 mb-4 p-1">
+      <View className="mx-4 mb-4 flex-row rounded-full border border-divider bg-card p-1">
         {(["map", "list"] as const).map((option) => (
           <Pressable
             key={option}
             onPress={() => setView(option)}
-            className={`rounded-full px-4 py-1.5 ${view === option ? "bg-ink" : ""}`}
+            className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-full py-2 ${
+              view === option ? "bg-surface shadow-sm" : ""
+            }`}
           >
+            <MaterialIcons
+              name={option === "map" ? "map" : "format-list-bulleted"}
+              size={16}
+              color={view === option ? "#121212" : "#6B7280"}
+            />
             <Text
-              className={`font-jakarta-bold text-xs ${view === option ? "text-white" : "text-muted"}`}
+              className={`font-jakarta-bold text-xs ${view === option ? "text-ink" : "text-muted"}`}
             >
-              {option === "map" ? "MAP VIEW" : "LIST VIEW"}
+              {option === "map" ? "Map View" : "List View"}
             </Text>
           </Pressable>
         ))}
@@ -73,10 +97,20 @@ export default function RiderHome() {
       <View className="p-4">
         <Pressable
           onPress={() => router.push("/(rider)/book")}
-          className="h-14 flex-row items-center gap-3 rounded-full border border-divider bg-card px-5 shadow-sm"
+          className="flex-row items-center rounded-2xl border border-divider bg-card px-4 py-3 shadow-sm"
         >
-          <View className="h-2.5 w-2.5 rotate-45 bg-danger" />
-          <Text className="font-jakarta-semibold text-base text-muted">Where are you going?</Text>
+          <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-primary">
+            <MaterialIcons name="near-me" size={18} color="#121212" />
+          </View>
+          <View className="flex-1">
+            <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
+              Destination
+            </Text>
+            <Text className="font-jakarta-bold text-base text-ink">Where to in Bengaluru?</Text>
+          </View>
+          <View className="ml-1 h-10 w-10 items-center justify-center rounded-full bg-surface">
+            <MaterialIcons name="mic" size={18} color="#6B7280" />
+          </View>
         </Pressable>
       </View>
     </View>
