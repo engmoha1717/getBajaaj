@@ -1,11 +1,12 @@
-import { useAuth, useUser } from "@clerk/expo";
+import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, Redirect } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { useCurrentUser } from "@/lib/useCurrentUser";
+
 export default function Home() {
-  const { isLoaded, isSignedIn, signOut } = useAuth();
-  const { user } = useUser();
+  const { isLoaded, isSignedIn } = useAuth();
 
   if (!isLoaded) return null;
 
@@ -56,25 +57,24 @@ export default function Home() {
     );
   }
 
-  return (
-    <View className="flex-1 items-center justify-center gap-6 bg-white px-6 dark:bg-neutral-950">
-      <View className="items-center gap-2">
-        <Text className="text-4xl font-bold text-neutral-900 dark:text-neutral-50">
-          GetBajaaj
-        </Text>
-        <Text className="text-base text-neutral-500 dark:text-neutral-400">
-          Welcome back{user?.firstName ? `, ${user.firstName}` : ""}.
-        </Text>
-      </View>
+  return <SignedInRouter />;
+}
 
-      <Pressable
-        onPress={() => signOut()}
-        className="rounded-full bg-neutral-900 px-8 py-3 active:opacity-80 dark:bg-neutral-50"
-      >
-        <Text className="text-base font-semibold text-white dark:text-neutral-900">
-          Sign out
-        </Text>
-      </Pressable>
-    </View>
-  );
+// Split into its own component so useCurrentUser() — which needs a
+// Clerk token — only ever runs once we know isSignedIn is true above.
+function SignedInRouter() {
+  const { data, isLoading, error } = useCurrentUser();
+
+  if (isLoading) return null;
+
+  // Only DRIVER goes to the driver section. RIDER, ADMIN, and the
+  // "couldn't tell yet" case (e.g. the user.created webhook hasn't
+  // landed in Neon the instant after sign-up) all default to rider —
+  // that matches the database's own default role, and is the safer
+  // side to land an unrecognized account on.
+  if (!error && data?.role === "DRIVER") {
+    return <Redirect href="/(driver)" />;
+  }
+
+  return <Redirect href="/(rider)" />;
 }
