@@ -25,15 +25,22 @@ export default function SignInScreen() {
 
   const onSubmit = async () => {
     setFormError(null);
-    const { error } = await signIn.password({ emailAddress, password });
-    if (error) {
-      setFormError(error.longMessage ?? "Couldn't sign in. Check your details and try again.");
-      return;
-    }
-    if (signIn.status === "complete") {
-      await signIn.finalize({ navigate: () => router.replace("/") });
-    } else {
-      setFormError("Additional verification is required — not supported in this app yet.");
+    try {
+      const { error } = await signIn.password({ emailAddress, password });
+      if (error) {
+        console.error("[sign-in:password]", error);
+        setFormError(error.longMessage ?? "Couldn't sign in. Check your details and try again.");
+        return;
+      }
+      if (signIn.status === "complete") {
+        await signIn.finalize({ navigate: () => router.replace("/") });
+      } else {
+        setFormError("Additional verification is required — not supported in this app yet.");
+      }
+    } catch (err) {
+      console.error("[sign-in:unexpected]", err);
+      const message = err instanceof Error ? err.message : String(err);
+      setFormError(`Couldn't sign in: ${message}`);
     }
   };
 

@@ -27,32 +27,47 @@ export default function SignUpScreen() {
 
   const onSubmitDetails = async () => {
     setFormError(null);
-    const { error } = await signUp.password({ emailAddress, password });
-    if (error) {
-      setFormError(error.longMessage ?? "Couldn't create your account.");
-      return;
+    try {
+      const { error } = await signUp.password({ emailAddress, password });
+      if (error) {
+        console.error("[sign-up:password]", error);
+        setFormError(error.longMessage ?? "Couldn't create your account.");
+        return;
+      }
+      if (signUp.status === "complete") {
+        await signUp.finalize({ navigate: () => router.replace("/") });
+        return;
+      }
+      const { error: sendError } = await signUp.verifications.sendEmailCode();
+      if (sendError) {
+        console.error("[sign-up:sendEmailCode]", sendError);
+        setFormError(sendError.longMessage ?? "Couldn't send a verification code.");
+        return;
+      }
+      setPendingVerification(true);
+    } catch (err) {
+      console.error("[sign-up:unexpected]", err);
+      const message = err instanceof Error ? err.message : String(err);
+      setFormError(`Couldn't create your account: ${message}`);
     }
-    if (signUp.status === "complete") {
-      await signUp.finalize({ navigate: () => router.replace("/") });
-      return;
-    }
-    const { error: sendError } = await signUp.verifications.sendEmailCode();
-    if (sendError) {
-      setFormError(sendError.longMessage ?? "Couldn't send a verification code.");
-      return;
-    }
-    setPendingVerification(true);
   };
 
   const onVerifyCode = async () => {
     setFormError(null);
-    const { error } = await signUp.verifications.verifyEmailCode({ code });
-    if (error) {
-      setFormError(error.longMessage ?? "That code didn't work.");
-      return;
-    }
-    if (signUp.status === "complete") {
-      await signUp.finalize({ navigate: () => router.replace("/") });
+    try {
+      const { error } = await signUp.verifications.verifyEmailCode({ code });
+      if (error) {
+        console.error("[sign-up:verifyEmailCode]", error);
+        setFormError(error.longMessage ?? "That code didn't work.");
+        return;
+      }
+      if (signUp.status === "complete") {
+        await signUp.finalize({ navigate: () => router.replace("/") });
+      }
+    } catch (err) {
+      console.error("[sign-up:verify-unexpected]", err);
+      const message = err instanceof Error ? err.message : String(err);
+      setFormError(`Couldn't verify: ${message}`);
     }
   };
 
@@ -147,16 +162,27 @@ export default function SignUpScreen() {
             placeholderTextColor="#9ca3af"
             className="rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 dark:border-neutral-700 dark:text-neutral-50"
           />
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Password"
-            secureTextEntry
-            placeholderTextColor="#9ca3af"
-            className="rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 dark:border-neutral-700 dark:text-neutral-50"
-          />
+          <View className="gap-1.5">
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password"
+              secureTextEntry
+              placeholderTextColor="#9ca3af"
+              className="rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 dark:border-neutral-700 dark:text-neutral-50"
+            />
+            <Text className="text-xs text-neutral-400 dark:text-neutral-500">
+              At least 15 characters.
+            </Text>
+          </View>
 
           {formError && <Text className="text-sm text-red-500">{formError}</Text>}
+
+          {/* Bot-protection mount point Clerk requires in custom sign-up
+              flows — renders only on web; iOS/Android skip it entirely.
+              Without it, web sign-ups can be silently blocked as
+              suspected bots with no way to prove otherwise. */}
+          <View nativeID="clerk-captcha" />
 
           <Pressable
             onPress={onSubmitDetails}

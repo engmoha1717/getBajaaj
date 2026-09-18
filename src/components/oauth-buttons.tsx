@@ -13,11 +13,16 @@ export function OAuthButtons({
   const onPress = async (strategy: "oauth_google" | "oauth_apple") => {
     try {
       const { createdSessionId } = await startSSOFlow({ strategy });
-      if (createdSessionId) {
-        router.replace("/");
+      if (!createdSessionId) {
+        // User cancelled the browser flow, or it didn't complete — not an error.
+        return;
       }
-    } catch {
-      onError("Something went wrong with that sign-in. Please try again.");
+      router.replace("/");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`[oauth:${strategy}]`, err);
+      const message = err instanceof Error ? err.message : String(err);
+      onError(`Couldn't sign in with ${strategy === "oauth_google" ? "Google" : "Apple"}: ${message}`);
     }
   };
 
