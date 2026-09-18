@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import { SearchRadar } from "@/components/SearchRadar";
 import { useCancelRide } from "@/lib/useCancelRide";
 import { useRide } from "@/lib/useRide";
 
@@ -44,7 +45,7 @@ export default function RideStatus() {
   return (
     <View className="flex-1 justify-between bg-white px-6 pt-24 pb-10 dark:bg-neutral-950">
       <View className="items-center gap-4">
-        {ride.status === "REQUESTED" && <ActivityIndicator size="large" />}
+        {ride.status === "REQUESTED" && <SearchRadar />}
         <Text className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">
           {STATUS_LABEL[ride.status] ?? ride.status}
         </Text>
