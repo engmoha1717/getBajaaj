@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
+import { useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
@@ -14,6 +15,7 @@ export default function RiderHome() {
   const { address, loading, coords, refresh: refreshLocation } = useCurrentLocation();
   const { data: drivers, isLoading: driversLoading } = useNearbyDrivers(coords);
   const showLoading = loading || driversLoading;
+  const mapRef = useRef<MapView>(null);
   // Driven by a route param rather than useState so the view choice
   // survives back/forward navigation and deep links.
   const { view: viewParam } = useLocalSearchParams<{ view?: string }>();
@@ -69,6 +71,24 @@ export default function RiderHome() {
           </Pressable>
         </View>
 
+        <Pressable
+          onPress={() => router.push("/(rider)/book")}
+          className="mx-4 mb-3 flex-row items-center rounded-2xl border border-divider bg-card px-4 py-3 shadow-sm"
+        >
+          <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-primary">
+            <MaterialIcons name="near-me" size={18} color="#121212" />
+          </View>
+          <View className="flex-1">
+            <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
+              Destination
+            </Text>
+            <Text className="font-jakarta-bold text-base text-ink">Where to in Bengaluru?</Text>
+          </View>
+          <View className="ml-1 h-10 w-10 items-center justify-center rounded-full bg-surface">
+            <MaterialIcons name="mic" size={18} color="#6B7280" />
+          </View>
+        </Pressable>
+
         <View className="mx-4 mb-4 flex-row rounded-full border border-divider bg-card p-1">
           {(["map", "list"] as const).map((option) => (
             <Pressable
@@ -112,6 +132,7 @@ export default function RiderHome() {
           coords ? (
             <View className="mx-4 flex-1 overflow-hidden rounded-3xl border border-divider">
               <MapView
+                ref={mapRef}
                 className="flex-1"
                 showsUserLocation
                 initialRegion={{
@@ -136,6 +157,30 @@ export default function RiderHome() {
                   />
                 ))}
               </MapView>
+
+              <Pressable
+                onPress={async () => {
+                  const fresh = await refreshLocation();
+                  if (fresh) {
+                    mapRef.current?.animateToRegion({
+                      latitude: fresh.lat,
+                      longitude: fresh.lng,
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    });
+                  }
+                }}
+                className="absolute right-3 top-3 h-11 w-11 items-center justify-center rounded-full bg-card shadow-md active:opacity-70"
+              >
+                <MaterialIcons name="my-location" size={20} color="#008744" />
+              </Pressable>
+
+              <View className="absolute bottom-3 left-3 flex-row items-center gap-1.5 rounded-full bg-card px-3 py-1.5 shadow-sm">
+                <View className="h-2 w-2 rounded-full bg-accent" />
+                <Text className="font-jakarta-bold text-[11px] text-ink">
+                  {drivers?.length ?? 0} verified auto{drivers?.length === 1 ? "" : "s"} nearby
+                </Text>
+              </View>
             </View>
           ) : (
             <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
@@ -198,26 +243,6 @@ export default function RiderHome() {
             ))}
           </ScrollView>
         )}
-
-        <View className="p-4">
-          <Pressable
-            onPress={() => router.push("/(rider)/book")}
-            className="flex-row items-center rounded-2xl border border-divider bg-card px-4 py-3 shadow-sm"
-          >
-            <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-primary">
-              <MaterialIcons name="near-me" size={18} color="#121212" />
-            </View>
-            <View className="flex-1">
-              <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
-                Destination
-              </Text>
-              <Text className="font-jakarta-bold text-base text-ink">Where to in Bengaluru?</Text>
-            </View>
-            <View className="ml-1 h-10 w-10 items-center justify-center rounded-full bg-surface">
-              <MaterialIcons name="mic" size={18} color="#6B7280" />
-            </View>
-          </Pressable>
-        </View>
       </View>
     </TabBarShell>
   );

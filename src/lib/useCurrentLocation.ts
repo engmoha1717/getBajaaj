@@ -13,21 +13,26 @@ export function useCurrentLocation() {
   // Pulled out of the mount effect so a screen can also call this on
   // demand (e.g. tapping the address label to retry) — fetching once
   // automatically, not continuously, and again only when asked for.
-  const refresh = useCallback(async () => {
+  // Returns the fresh coords directly, not just via state — a caller
+  // that needs them immediately (e.g. animating a map camera) would
+  // otherwise be racing React's render cycle for the updated `coords`.
+  const refresh = useCallback(async (): Promise<Coords | null> => {
     setLoading(true);
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       setLoading(false);
-      return;
+      return null;
     }
 
     const position = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = position.coords;
-    setCoords({ lat: latitude, lng: longitude });
+    const next = { lat: latitude, lng: longitude };
+    setCoords(next);
 
     const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
     setAddress(place ? [place.name, place.street, place.city].filter(Boolean).join(", ") : "");
     setLoading(false);
+    return next;
   }, []);
 
   useEffect(() => {
