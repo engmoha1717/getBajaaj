@@ -190,7 +190,14 @@ export default function DriverHome() {
         </View>
 
         {online ? (
-          <View className="flex-row items-center gap-2 rounded-lg bg-accent/10 px-3 py-2">
+          // bg-accent/10 as a plain style, not a NativeWind opacity-suffixed
+          // class — this bar mounts/unmounts on the same `online` toggle
+          // that already crashed once with "Couldn't find a navigation
+          // context" from exactly this class pattern (see (rider)/index.tsx).
+          <View
+            className="flex-row items-center gap-2 rounded-lg px-3 py-2"
+            style={{ backgroundColor: "rgba(0, 135, 68, 0.1)" }}
+          >
             <MaterialIcons name="radar" size={16} color="#008744" />
             <Text
               className="flex-1 font-jakarta-semibold text-xs text-accent"
@@ -233,9 +240,19 @@ export default function DriverHome() {
       </View>
 
       {hasActiveRide ? (
-        <View className="mx-4 gap-3 rounded-2xl border border-divider bg-card p-4 shadow-sm">
+        // shadow-sm as a plain style here too — this whole card mounts as a
+        // fresh subtree on the same online/hasActiveRide state change that
+        // already crashed once via a NativeWind class racing navigation
+        // context init (see the other bg-*/10 fixes in this file).
+        <View
+          className="mx-4 gap-3 rounded-2xl border border-divider bg-card p-4"
+          style={{ shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}
+        >
           <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1">
+            <View
+              className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1"
+              style={{ backgroundColor: "rgba(0, 135, 68, 0.1)" }}
+            >
               <MaterialIcons name="electric-rickshaw" size={14} color="#008744" />
               <Text className="font-jakarta-extrabold text-[10px] uppercase tracking-wider text-accent">
                 Active ride
@@ -295,9 +312,15 @@ export default function DriverHome() {
           </Pressable>
         </View>
       ) : online && nextRequest ? (
-        <View className="mx-4 gap-3 rounded-2xl border-2 border-accent bg-card p-4 shadow-md">
+        <View
+          className="mx-4 gap-3 rounded-2xl border-2 border-accent bg-card p-4"
+          style={{ shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}
+        >
           <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-1.5 rounded-full bg-danger/10 px-2.5 py-1">
+            <View
+              className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1"
+              style={{ backgroundColor: "rgba(217, 56, 58, 0.1)" }}
+            >
               <MaterialIcons name="priority-high" size={14} color="#D9383A" />
               <Text className="font-jakarta-extrabold text-[10px] uppercase tracking-wider text-danger">
                 Incoming request

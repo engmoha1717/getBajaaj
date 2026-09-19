@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type Coords = { lat: number; lng: number };
 
@@ -10,26 +10,29 @@ export function useCurrentLocation() {
   const [coords, setCoords] = useState<Coords | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setLoading(false);
-        return;
-      }
-
-      const position = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = position.coords;
-      setCoords({ lat: latitude, lng: longitude });
-
-      const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
-      if (place) {
-        const parts = [place.name, place.street, place.city].filter(Boolean);
-        setAddress(parts.join(", "));
-      }
+  // Pulled out of the mount effect so a screen can also call this on
+  // demand (e.g. tapping the address label to retry) — fetching once
+  // automatically, not continuously, and again only when asked for.
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
       setLoading(false);
-    })();
+      return;
+    }
+
+    const position = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = position.coords;
+    setCoords({ lat: latitude, lng: longitude });
+
+    const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
+    setAddress(place ? [place.name, place.street, place.city].filter(Boolean).join(", ") : "");
+    setLoading(false);
   }, []);
 
-  return { address, setAddress, coords, loading };
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { address, setAddress, coords, loading, refresh };
 }

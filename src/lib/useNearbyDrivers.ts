@@ -10,6 +10,8 @@ export type NearbyDriver = {
   vehicleMake: string;
   vehicleModel: string;
   distanceKm: number;
+  lat: number;
+  lng: number;
 };
 
 // Polls rather than pushes — good enough for a list view; a real-time

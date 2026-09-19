@@ -10,6 +10,10 @@ export type RideRequestInput = {
   dropoffAddress: string;
   dropoffLat: number;
   dropoffLng: number;
+  // Set when requesting a specific driver from the nearby-drivers list —
+  // the server creates the ride straight into ACCEPTED for that driver
+  // instead of the open queue.
+  driverId?: string;
 };
 
 export type Ride = RideRequestInput & {

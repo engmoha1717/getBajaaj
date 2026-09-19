@@ -3,6 +3,7 @@ import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 import { TabBarShell } from "@/components/TabBarShell";
 import { useCurrentLocation } from "@/lib/useCurrentLocation";
@@ -10,7 +11,7 @@ import { useNearbyDrivers } from "@/lib/useNearbyDrivers";
 
 export default function RiderHome() {
   const { user } = useUser();
-  const { address, loading, coords } = useCurrentLocation();
+  const { address, loading, coords, refresh: refreshLocation } = useCurrentLocation();
   const { data: drivers, isLoading: driversLoading } = useNearbyDrivers(coords);
   const showLoading = loading || driversLoading;
   // Driven by a route param rather than useState so the view choice
@@ -40,12 +41,17 @@ export default function RiderHome() {
                   </Text>
                 </View>
               </View>
-              <View className="flex-row items-center gap-1">
+              <Pressable
+                onPress={() => refreshLocation()}
+                disabled={loading}
+                className="flex-row items-center gap-1 active:opacity-60"
+              >
                 <MaterialIcons name="location-on" size={13} color="#008744" />
                 <Text numberOfLines={1} className="flex-1 font-jakarta-medium text-xs text-muted">
-                  {loading ? "Finding you…" : address || "Location unavailable"}
+                  {loading ? "Finding you…" : address || "Tap to set your location"}
                 </Text>
-              </View>
+                <MaterialIcons name="refresh" size={13} color="#6B7280" />
+              </Pressable>
             </View>
           </View>
 
@@ -103,14 +109,44 @@ export default function RiderHome() {
         </View>
 
         {view === "map" ? (
-          <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
-              <View className="h-3 w-3 rounded-full bg-accent" />
+          coords ? (
+            <View className="mx-4 flex-1 overflow-hidden rounded-3xl border border-divider">
+              <MapView
+                className="flex-1"
+                showsUserLocation
+                initialRegion={{
+                  latitude: coords.lat,
+                  longitude: coords.lng,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }}
+              >
+                {(drivers ?? []).map((driver) => (
+                  <Marker
+                    key={driver.id}
+                    coordinate={{ latitude: driver.lat, longitude: driver.lng }}
+                    title={driver.name}
+                    description={`${driver.vehicleMake} ${driver.vehicleModel} — ${driver.distanceKm.toFixed(1)} km`}
+                    onCalloutPress={() =>
+                      router.push({
+                        pathname: "/(rider)/book",
+                        params: { driverId: driver.id, driverName: driver.name },
+                      })
+                    }
+                  />
+                ))}
+              </MapView>
             </View>
-            <Text className="mt-3 font-jakarta-bold text-sm text-muted">
-              Map view — coming soon
-            </Text>
-          </View>
+          ) : (
+            <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
+              <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+                <MaterialIcons name="my-location" size={24} color="#6B7280" />
+              </View>
+              <Text className="mt-3 font-jakarta-bold text-sm text-muted">
+                Finding your location…
+              </Text>
+            </View>
+          )
         ) : showLoading ? (
           <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
             <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
@@ -135,9 +171,15 @@ export default function RiderHome() {
         ) : (
           <ScrollView className="mx-4 flex-1" contentContainerStyle={{ gap: 12 }}>
             {drivers.map((driver) => (
-              <View
+              <Pressable
                 key={driver.id}
-                className="flex-row items-center gap-3 rounded-2xl border border-divider bg-card px-4 py-3"
+                onPress={() =>
+                  router.push({
+                    pathname: "/(rider)/book",
+                    params: { driverId: driver.id, driverName: driver.name },
+                  })
+                }
+                className="flex-row items-center gap-3 rounded-2xl border border-divider bg-card px-4 py-3 active:opacity-70"
               >
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-surface">
                   <MaterialIcons name="electric-rickshaw" size={20} color="#008744" />
@@ -151,7 +193,8 @@ export default function RiderHome() {
                 <Text className="font-jakarta-bold text-xs text-muted">
                   {driver.distanceKm.toFixed(1)} km
                 </Text>
-              </View>
+                <MaterialIcons name="chevron-right" size={20} color="#6B7280" />
+              </Pressable>
             ))}
           </ScrollView>
         )}

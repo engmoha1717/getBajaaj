@@ -1,4 +1,5 @@
-import { router } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 
@@ -10,6 +11,10 @@ import { useCurrentLocation } from "@/lib/useCurrentLocation";
 const PLACEHOLDER_FARE = 90;
 
 export default function BookRide() {
+  const { driverId, driverName } = useLocalSearchParams<{
+    driverId?: string;
+    driverName?: string;
+  }>();
   const createRide = useCreateRide();
   const { address: pickupAddress, setAddress: setPickupAddress, coords: pickupCoords, loading: locating } =
     useCurrentLocation();
@@ -29,6 +34,7 @@ export default function BookRide() {
         dropoffAddress,
         dropoffLat: 0,
         dropoffLng: 0,
+        ...(driverId ? { driverId } : {}),
       },
       { onSuccess: (ride) => router.push(`/(rider)/ride/${ride.id}`) },
     );
@@ -44,6 +50,15 @@ export default function BookRide() {
           Enter your pickup and drop-off to request a ride.
         </Text>
       </View>
+
+      {driverName ? (
+        <View className="flex-row items-center gap-2 rounded-2xl border border-divider bg-card px-4 py-3">
+          <MaterialIcons name="electric-rickshaw" size={18} color="#008744" />
+          <Text className="flex-1 font-jakarta-semibold text-sm text-ink">
+            Requesting <Text className="font-jakarta-bold">{driverName}</Text> directly
+          </Text>
+        </View>
+      ) : null}
 
       <View className="rounded-3xl border border-divider bg-card px-4 py-2 shadow-sm">
         <View className="flex-row items-center gap-3 py-3">
