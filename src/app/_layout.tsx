@@ -26,12 +26,11 @@ WebBrowser.maybeCompleteAuthSession();
 SplashScreen.preventAutoHideAsync();
 
 // react-native-screens freezes inactive screens' React trees as a perf
-// optimization. Disabling it: every structural fix for the "Couldn't
-// find a navigation context" crash (explicit Stack.Screen, <Slot>
-// instead of <Tabs>, flattening nested groups, latest expo-router
-// patch) failed, always at the same trigger (a screen re-rendering
-// after having been mounted for a moment) — exactly the shape of a
-// screen-freeze/thaw bug, not something fixable from the JS side.
+// optimization. Disabled while chasing a "Couldn't find a navigation
+// context" crash that turned out to be unrelated (a NativeWind
+// conditionally-toggled `shadow-*` class racing context init, see
+// (rider)/index.tsx) — left off since it's a no-op on the flat (rider)
+// stack this app now uses, not because freeze itself was ever the cause.
 enableFreeze(false);
 
 export default function RootLayout() {

@@ -2,23 +2,19 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { TabBarShell } from "@/components/TabBarShell";
 import { useCurrentLocation } from "@/lib/useCurrentLocation";
+import { useNearbyDrivers } from "@/lib/useNearbyDrivers";
 
 export default function RiderHome() {
   const { user } = useUser();
-  const { address, loading } = useCurrentLocation();
-  // Driven by a route param, not useState — every setState-triggered
-  // re-render of this screen crashed with "Couldn't find a navigation
-  // context" on iOS (confirmed not fixable via explicit Stack.Screen,
-  // <Slot> instead of <Tabs>, flattening the nested tabs group,
-  // updating expo-router, or disabling react-native-screens' freeze
-  // optimization — five separate structural fixes, same crash every
-  // time). router.setParams() re-renders this screen through
-  // expo-router's own update path instead of a local setState call,
-  // sidestepping whatever that specific trigger is entirely.
+  const { address, loading, coords } = useCurrentLocation();
+  const { data: drivers, isLoading: driversLoading } = useNearbyDrivers(coords);
+  const showLoading = loading || driversLoading;
+  // Driven by a route param rather than useState so the view choice
+  // survives back/forward navigation and deep links.
   const { view: viewParam } = useLocalSearchParams<{ view?: string }>();
   const view = viewParam === "list" ? "list" : "map";
 
@@ -73,8 +69,24 @@ export default function RiderHome() {
               key={option}
               onPress={() => router.setParams({ view: option })}
               className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-full py-2 ${
-                view === option ? "bg-surface shadow-sm" : ""
+                view === option ? "bg-surface" : ""
               }`}
+              // Toggling NativeWind's `shadow-sm` class conditionally is a known
+              // trigger for the "Couldn't find a navigation context" crash (its
+              // runtime CSS parsing races React Navigation's context init) —
+              // https://github.com/nativewind/nativewind/issues/1557. Applying
+              // the shadow as a plain RN style sidesteps that class-interop path.
+              style={
+                view === option
+                  ? {
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 2,
+                      elevation: 1,
+                    }
+                  : undefined
+              }
             >
               <MaterialIcons
                 name={option === "map" ? "map" : "format-list-bulleted"}
@@ -90,30 +102,59 @@ export default function RiderHome() {
           ))}
         </View>
 
-        <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
-          {view === "map" ? (
-            <>
-              <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
-                <View className="h-3 w-3 rounded-full bg-accent" />
-              </View>
-              <Text className="mt-3 font-jakarta-bold text-sm text-muted">
-                Map view — coming soon
-              </Text>
-            </>
-          ) : (
-            <View className="items-center px-8">
-              <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
-                <MaterialIcons name="electric-rickshaw" size={24} color="#6B7280" />
-              </View>
-              <Text className="mt-3 font-jakarta-bold text-sm text-muted">
-                No drivers nearby yet
-              </Text>
-              <Text className="mt-1 text-center font-jakarta-medium text-xs text-muted">
-                We're still onboarding drivers in your area — check back soon.
-              </Text>
+        {view === "map" ? (
+          <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+              <View className="h-3 w-3 rounded-full bg-accent" />
             </View>
-          )}
-        </View>
+            <Text className="mt-3 font-jakarta-bold text-sm text-muted">
+              Map view — coming soon
+            </Text>
+          </View>
+        ) : showLoading ? (
+          <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+              <MaterialIcons name="electric-rickshaw" size={24} color="#6B7280" />
+            </View>
+            <Text className="mt-3 font-jakarta-bold text-sm text-muted">
+              Finding drivers nearby…
+            </Text>
+          </View>
+        ) : !drivers?.length ? (
+          <View className="mx-4 flex-1 items-center justify-center rounded-3xl border border-dashed border-divider bg-card">
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+              <MaterialIcons name="electric-rickshaw" size={24} color="#6B7280" />
+            </View>
+            <Text className="mt-3 font-jakarta-bold text-sm text-muted">
+              No drivers nearby yet
+            </Text>
+            <Text className="mt-1 text-center font-jakarta-medium text-xs text-muted">
+              We're still onboarding drivers in your area — check back soon.
+            </Text>
+          </View>
+        ) : (
+          <ScrollView className="mx-4 flex-1" contentContainerStyle={{ gap: 12 }}>
+            {drivers.map((driver) => (
+              <View
+                key={driver.id}
+                className="flex-row items-center gap-3 rounded-2xl border border-divider bg-card px-4 py-3"
+              >
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-surface">
+                  <MaterialIcons name="electric-rickshaw" size={20} color="#008744" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-jakarta-bold text-sm text-ink">{driver.name}</Text>
+                  <Text className="font-jakarta-medium text-xs text-muted">
+                    {driver.vehicleMake} {driver.vehicleModel}
+                  </Text>
+                </View>
+                <Text className="font-jakarta-bold text-xs text-muted">
+                  {driver.distanceKm.toFixed(1)} km
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        )}
 
         <View className="p-4">
           <Pressable

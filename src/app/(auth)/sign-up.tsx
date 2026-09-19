@@ -30,7 +30,7 @@ export default function SignUpScreen() {
     try {
       const { error } = await signUp.password({ emailAddress, password });
       if (error) {
-        console.error("[sign-up:password]", error);
+        console.warn("[sign-up:password]", error);
         setFormError(error.longMessage ?? "Couldn't create your account.");
         return;
       }
@@ -40,7 +40,7 @@ export default function SignUpScreen() {
       }
       const { error: sendError } = await signUp.verifications.sendEmailCode();
       if (sendError) {
-        console.error("[sign-up:sendEmailCode]", sendError);
+        console.warn("[sign-up:sendEmailCode]", sendError);
         setFormError(sendError.longMessage ?? "Couldn't send a verification code.");
         return;
       }
@@ -57,7 +57,7 @@ export default function SignUpScreen() {
     try {
       const { error } = await signUp.verifications.verifyEmailCode({ code });
       if (error) {
-        console.error("[sign-up:verifyEmailCode]", error);
+        console.warn("[sign-up:verifyEmailCode]", error);
         setFormError(error.longMessage ?? "That code didn't work.");
         return;
       }

@@ -28,7 +28,7 @@ export default function SignInScreen() {
     try {
       const { error } = await signIn.password({ emailAddress, password });
       if (error) {
-        console.error("[sign-in:password]", error);
+        console.warn("[sign-in:password]", error);
         setFormError(error.longMessage ?? "Couldn't sign in. Check your details and try again.");
         return;
       }
