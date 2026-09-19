@@ -76,47 +76,11 @@ export default function RiderHome() {
           </Pressable>
         </View>
 
-        <Pressable
-          onPress={() => router.push("/(rider)/book")}
-          className="mx-4 mb-3 flex-row items-center rounded-2xl border border-divider bg-card px-4 py-3 shadow-sm"
-        >
-          <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-primary">
-            <MaterialIcons name="near-me" size={18} color="#121212" />
-          </View>
-          <View className="flex-1">
-            <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
-              Destination
-            </Text>
-            <Text className="font-jakarta-bold text-base text-ink">Where to in Bengaluru?</Text>
-          </View>
-          <View className="ml-1 h-10 w-10 items-center justify-center rounded-full bg-surface">
-            <MaterialIcons name="mic" size={18} color="#6B7280" />
-          </View>
-        </Pressable>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-3"
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, alignItems: "center" }}
-        >
-          {QUICK_DESTINATIONS.map((label) => (
-            <Pressable
-              key={label}
-              onPress={() =>
-                router.push({ pathname: "/(rider)/book", params: { dropoff: label } })
-              }
-              className="flex-row items-center gap-1 self-start rounded-full border border-divider bg-card px-2.5 py-1 active:opacity-70"
-            >
-              <MaterialIcons name="history" size={12} color="#008744" />
-              <Text className="font-jakarta-semibold text-[11px] text-ink" numberOfLines={1}>
-                {label}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <View className="mx-4 mb-4 flex-row rounded-full border border-divider bg-card p-1">
+        {/* Order matches the actual Stitch "Home - Map View & Booking"
+            markup: view-switcher tabs right under the header, then the
+            destination input, then the quick chips — not search-first
+            like the earlier draft had it. */}
+        <View className="mx-4 mb-3 flex-row rounded-full border border-divider bg-card p-1">
           {(["map", "list"] as const).map((option) => (
             <Pressable
               key={option}
@@ -154,6 +118,46 @@ export default function RiderHome() {
             </Pressable>
           ))}
         </View>
+
+        <Pressable
+          onPress={() => router.push("/(rider)/book")}
+          className="mx-4 mb-3 flex-row items-center rounded-2xl border border-divider bg-card px-4 py-3 shadow-sm"
+        >
+          <View className="mr-3 h-9 w-9 items-center justify-center rounded-full bg-primary">
+            <MaterialIcons name="near-me" size={18} color="#121212" />
+          </View>
+          <View className="flex-1">
+            <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
+              Destination
+            </Text>
+            <Text className="font-jakarta-bold text-base text-ink">Where to in Bengaluru?</Text>
+          </View>
+          <View className="ml-1 h-10 w-10 items-center justify-center rounded-full bg-surface">
+            <MaterialIcons name="mic" size={18} color="#6B7280" />
+          </View>
+        </Pressable>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-4"
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, alignItems: "center" }}
+        >
+          {QUICK_DESTINATIONS.map((label) => (
+            <Pressable
+              key={label}
+              onPress={() =>
+                router.push({ pathname: "/(rider)/book", params: { dropoff: label } })
+              }
+              className="flex-row items-center gap-1 self-start rounded-full border border-divider bg-card px-2.5 py-1 active:opacity-70"
+            >
+              <MaterialIcons name="history" size={12} color="#008744" />
+              <Text className="font-jakarta-semibold text-[11px] text-ink" numberOfLines={1}>
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         {view === "map" ? (
           coords ? (
