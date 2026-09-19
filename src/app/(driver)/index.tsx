@@ -68,6 +68,23 @@ export default function DriverHome() {
     setOtpInput("");
   }, [currentRide?.id]);
 
+  // useDriverOnline's `online` is local React state — it always starts
+  // false on a fresh mount (app reload, cold start), even if the
+  // server still has isOnline: true from before. Without this, a
+  // driver who reloads while genuinely online sees "Go online" (wrong)
+  // and, worse, GPS reporting never resumes even though the database
+  // still thinks they're online. Resync once the real server value
+  // loads.
+  useEffect(() => {
+    if (profile?.isOnline && !online) {
+      goOnline();
+    }
+    // Deliberately just [profile?.isOnline]: this is a one-time catch-up
+    // on load, not a continuous sync — goOnline/goOffline already keep
+    // the server in step with every subsequent local toggle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.isOnline]);
+
   // "Pass" has no backend concept — every driver sees the same
   // unfiltered queue, so there's nothing to persist server-side.
   // Hiding a passed request locally (until it's re-fetched away by
