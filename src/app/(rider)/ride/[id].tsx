@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 import { SearchRadar } from "@/components/SearchRadar";
 import { useCancelRide } from "@/lib/useCancelRide";
@@ -42,6 +43,9 @@ export default function RideStatus() {
     );
   }
 
+  const hasDriverLocation =
+    ride.driver?.lastLat != null && ride.driver?.lastLng != null;
+
   return (
     <View className="flex-1 justify-between bg-white px-6 pt-24 pb-10 dark:bg-neutral-950">
       <View className="items-center gap-4">
@@ -50,6 +54,37 @@ export default function RideStatus() {
           {STATUS_LABEL[ride.status] ?? ride.status}
         </Text>
       </View>
+
+      {ride.status === "ACCEPTED" && ride.startOtp ? (
+        <View className="items-center gap-2 rounded-2xl bg-[#FFFDF5] px-6 py-4">
+          <Text className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            Give this code to {ride.driver?.user.name ?? "your driver"}
+          </Text>
+          <Text className="text-4xl font-extrabold tracking-[10px] text-[#121212]">
+            {ride.startOtp}
+          </Text>
+        </View>
+      ) : null}
+
+      {(ride.status === "ACCEPTED" || ride.status === "IN_PROGRESS") && hasDriverLocation ? (
+        <View className="h-48 overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
+          <MapView
+            className="flex-1"
+            region={{
+              latitude: ride.driver!.lastLat!,
+              longitude: ride.driver!.lastLng!,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+          >
+            <Marker
+              coordinate={{ latitude: ride.driver!.lastLat!, longitude: ride.driver!.lastLng! }}
+              title={ride.driver?.user.name}
+              pinColor="#008744"
+            />
+          </MapView>
+        </View>
+      ) : null}
 
       <View className="gap-3 rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800">
         <View className="gap-0.5">

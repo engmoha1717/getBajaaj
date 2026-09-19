@@ -19,6 +19,8 @@ export type RideRequestInput = {
 export type Ride = RideRequestInput & {
   id: string;
   status: "REQUESTED" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  startOtp: string | null;
+  driver: { lastLat: number | null; lastLng: number | null; user: { name: string } } | null;
 };
 
 export function useCreateRide() {

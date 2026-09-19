@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/api";
 
 export type CurrentDriverRide = {
   id: string;
+  status: "ACCEPTED" | "IN_PROGRESS";
   pickupAddress: string;
   dropoffAddress: string;
   rider: { name: string; phone: string | null };

@@ -1,8 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
-import { useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Linking, Pressable, Text, TextInput, View } from "react-native";
 
 import { DriverTabBarShell } from "@/components/DriverTabBarShell";
 import { useAcceptRide } from "@/lib/useAcceptRide";
@@ -12,6 +12,7 @@ import { useCurrentDriverRide } from "@/lib/useCurrentDriverRide";
 import { useDriverOnline } from "@/lib/useDriverOnline";
 import { useMyDriverProfile } from "@/lib/useMyDriverProfile";
 import { useMyRides } from "@/lib/useMyRides";
+import { useStartRide } from "@/lib/useStartRide";
 
 function formatDuration(ms: number) {
   const totalMinutes = Math.floor(ms / 60000);
@@ -58,6 +59,14 @@ export default function DriverHome() {
   const { data: availableRides } = useAvailableRides(isApproved && online && !hasActiveRide);
   const acceptRide = useAcceptRide();
   const completeRide = useCompleteRide();
+  const startRide = useStartRide();
+  const [otpInput, setOtpInput] = useState("");
+
+  // Otherwise a stale 4-digit guess from a finished ride would carry
+  // over and sit pre-filled (and possibly wrong) for the next one.
+  useEffect(() => {
+    setOtpInput("");
+  }, [currentRide?.id]);
 
   // "Pass" has no backend concept — every driver sees the same
   // unfiltered queue, so there's nothing to persist server-side.
@@ -255,7 +264,7 @@ export default function DriverHome() {
             >
               <MaterialIcons name="electric-rickshaw" size={14} color="#008744" />
               <Text className="font-jakarta-extrabold text-[10px] uppercase tracking-wider text-accent">
-                Active ride
+                {currentRide.status === "ACCEPTED" ? "Heading to pickup" : "In progress"}
               </Text>
             </View>
             <Text className="font-jakarta-extrabold text-xl text-ink">₹{FLAT_FARE}</Text>
@@ -296,20 +305,58 @@ export default function DriverHome() {
             </View>
           </View>
 
-          <Pressable
-            onPress={() => completeRide.mutate(currentRide.id)}
-            disabled={completeRide.isPending}
-            style={completeRide.isPending ? { opacity: 0.5 } : undefined}
-            className="h-14 items-center justify-center rounded-full bg-ink active:opacity-80"
-          >
-            {completeRide.isPending ? (
-              <ActivityIndicator color="#FFB800" />
-            ) : (
-              <Text className="font-jakarta-extrabold text-sm uppercase tracking-wide text-white">
-                Complete ride
+          {currentRide.status === "ACCEPTED" ? (
+            <View className="gap-2">
+              <Text className="font-jakarta-bold text-[10px] uppercase tracking-wider text-muted">
+                Ask the rider for their start code
               </Text>
-            )}
-          </Pressable>
+              <TextInput
+                value={otpInput}
+                onChangeText={(text) => setOtpInput(text.replace(/[^0-9]/g, "").slice(0, 4))}
+                placeholder="0000"
+                placeholderTextColor="#6B7280"
+                keyboardType="number-pad"
+                maxLength={4}
+                className="rounded-xl border border-divider bg-surface px-4 py-3 text-center font-jakarta-extrabold text-2xl tracking-[8px] text-ink"
+              />
+              {startRide.isError ? (
+                <Text className="text-center font-jakarta-bold text-xs text-danger">
+                  {startRide.error instanceof Error
+                    ? startRide.error.message
+                    : "Something went wrong."}
+                </Text>
+              ) : null}
+              <Pressable
+                onPress={() => startRide.mutate({ rideId: currentRide.id, otp: otpInput })}
+                disabled={otpInput.length !== 4 || startRide.isPending}
+                style={otpInput.length !== 4 || startRide.isPending ? { opacity: 0.5 } : undefined}
+                className="h-14 items-center justify-center rounded-full bg-accent active:opacity-80"
+              >
+                {startRide.isPending ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="font-jakarta-extrabold text-sm uppercase tracking-wide text-white">
+                    Start ride
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              onPress={() => completeRide.mutate(currentRide.id)}
+              disabled={completeRide.isPending}
+              style={completeRide.isPending ? { opacity: 0.5 } : undefined}
+              className="h-14 items-center justify-center rounded-full bg-ink active:opacity-80"
+            >
+              {completeRide.isPending ? (
+                <ActivityIndicator color="#FFB800" />
+              ) : (
+                <Text className="font-jakarta-extrabold text-sm uppercase tracking-wide text-white">
+                  Complete ride
+                </Text>
+              )}
+            </Pressable>
+          )}
         </View>
       ) : online && nextRequest ? (
         <View
