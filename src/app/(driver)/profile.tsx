@@ -1,3 +1,4 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth, useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { Pressable, Text, View } from "react-native";
@@ -34,6 +35,16 @@ export default function DriverProfile() {
               {user?.primaryEmailAddress?.emailAddress}
             </Text>
           </View>
+          {profile?.averageRating != null ? (
+            <View className="flex-row items-center gap-1 rounded-full bg-primary px-3 py-1">
+              <MaterialIcons name="star" size={14} color="#121212" />
+              <Text className="font-jakarta-extrabold text-xs text-ink">
+                {profile.averageRating.toFixed(1)} ({profile.ratingCount})
+              </Text>
+            </View>
+          ) : (
+            <Text className="font-jakarta-medium text-xs text-muted">No ratings yet</Text>
+          )}
         </View>
 
         <View className="gap-3 rounded-2xl border border-divider bg-card p-4 shadow-sm">

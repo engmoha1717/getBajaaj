@@ -1,9 +1,12 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { SearchRadar } from "@/components/SearchRadar";
 import { useCancelRide } from "@/lib/useCancelRide";
+import { useRateRide } from "@/lib/useRateRide";
 import { useRide } from "@/lib/useRide";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -18,6 +21,8 @@ export default function RideStatus() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: ride, isLoading } = useRide(id);
   const cancelRide = useCancelRide(id);
+  const rateRide = useRateRide(id);
+  const [selectedScore, setSelectedScore] = useState(0);
 
   if (isLoading || !ride) {
     return (
@@ -66,6 +71,57 @@ export default function RideStatus() {
         </View>
       ) : null}
 
+      {ride.status === "COMPLETED" ? (
+        ride.rating ? (
+          <View className="items-center gap-1">
+            <View className="flex-row gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <MaterialIcons
+                  key={n}
+                  name={n <= ride.rating!.score ? "star" : "star-border"}
+                  size={20}
+                  color="#FFB800"
+                />
+              ))}
+            </View>
+            <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+              You rated this ride
+            </Text>
+          </View>
+        ) : (
+          <View className="items-center gap-3 rounded-2xl bg-neutral-50 px-6 py-5 dark:bg-neutral-900">
+            <Text className="text-sm font-semibold text-neutral-900 dark:text-neutral-50">
+              Rate {ride.driver?.user.name ?? "your driver"}
+            </Text>
+            <View className="flex-row gap-2">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Pressable key={n} onPress={() => setSelectedScore(n)}>
+                  <MaterialIcons
+                    name={n <= selectedScore ? "star" : "star-border"}
+                    size={32}
+                    color="#FFB800"
+                  />
+                </Pressable>
+              ))}
+            </View>
+            {rateRide.isError ? (
+              <Text className="text-xs text-red-500">
+                {rateRide.error instanceof Error ? rateRide.error.message : "Something went wrong."}
+              </Text>
+            ) : null}
+            <Pressable
+              onPress={() => rateRide.mutate(selectedScore)}
+              disabled={selectedScore === 0 || rateRide.isPending}
+              className="w-full items-center rounded-full bg-[#FFB800] py-3 active:opacity-80 disabled:opacity-40"
+            >
+              <Text className="font-semibold text-[#271900]">
+                {rateRide.isPending ? "Submitting…" : "Submit rating"}
+              </Text>
+            </Pressable>
+          </View>
+        )
+      ) : null}
+
       {(ride.status === "ACCEPTED" || ride.status === "IN_PROGRESS") && hasDriverLocation ? (
         <View className="h-48 overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
           <MapView
@@ -109,6 +165,17 @@ export default function RideStatus() {
         >
           <Text className="text-center text-base font-semibold text-neutral-900 dark:text-neutral-50">
             {cancelRide.isPending ? "Cancelling…" : "Cancel ride"}
+          </Text>
+        </Pressable>
+      )}
+
+      {ride.status === "COMPLETED" && (
+        <Pressable
+          onPress={() => router.replace("/(rider)")}
+          className="rounded-full bg-[#FFB800] px-8 py-4 active:opacity-80"
+        >
+          <Text className="text-center text-base font-semibold text-[#271900]">
+            Book another ride
           </Text>
         </Pressable>
       )}

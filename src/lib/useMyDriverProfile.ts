@@ -9,6 +9,8 @@ export type MyDriverProfile = {
   vehicleMake: string;
   vehicleModel: string;
   vehiclePlate: string;
+  averageRating: number | null;
+  ratingCount: number;
 };
 
 export function useMyDriverProfile() {

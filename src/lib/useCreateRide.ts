@@ -21,6 +21,7 @@ export type Ride = RideRequestInput & {
   status: "REQUESTED" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   startOtp: string | null;
   driver: { lastLat: number | null; lastLng: number | null; user: { name: string } } | null;
+  rating: { score: number } | null;
 };
 
 export function useCreateRide() {
