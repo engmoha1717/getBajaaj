@@ -13,6 +13,7 @@ type LocationPing = { isOnline: boolean; lat?: number; lng?: number };
 export function useDriverOnline() {
   const { getToken } = useAuth();
   const [online, setOnline] = useState(false);
+  const [onlineSince, setOnlineSince] = useState<Date | null>(null);
   const [lastFix, setLastFix] = useState<{ lat: number; lng: number } | null>(null);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
@@ -37,6 +38,7 @@ export function useDriverOnline() {
       },
     );
     setOnline(true);
+    setOnlineSince(new Date());
   }, [report]);
 
   // Stops the GPS watch if this hook's owner unmounts (navigating away,
@@ -51,11 +53,13 @@ export function useDriverOnline() {
     subscriptionRef.current?.remove();
     subscriptionRef.current = null;
     setOnline(false);
+    setOnlineSince(null);
     report.mutate({ isOnline: false });
   }, [report]);
 
   return {
     online,
+    onlineSince,
     goOnline,
     goOffline,
     isSaving: report.isPending,
