@@ -98,7 +98,7 @@ export default function RiderHome() {
           horizontal
           showsHorizontalScrollIndicator={false}
           className="mb-3"
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, alignItems: "center" }}
         >
           {QUICK_DESTINATIONS.map((label) => (
             <Pressable
@@ -106,10 +106,12 @@ export default function RiderHome() {
               onPress={() =>
                 router.push({ pathname: "/(rider)/book", params: { dropoff: label } })
               }
-              className="flex-row items-center gap-1.5 rounded-full border border-divider bg-card px-3 py-1.5 active:opacity-70"
+              className="flex-row items-center gap-1 self-start rounded-full border border-divider bg-card px-2.5 py-1 active:opacity-70"
             >
-              <MaterialIcons name="history" size={14} color="#008744" />
-              <Text className="font-jakarta-semibold text-xs text-ink">{label}</Text>
+              <MaterialIcons name="history" size={12} color="#008744" />
+              <Text className="font-jakarta-semibold text-[11px] text-ink" numberOfLines={1}>
+                {label}
+              </Text>
             </Pressable>
           ))}
         </ScrollView>
