@@ -10,6 +10,11 @@ import { TabBarShell } from "@/components/TabBarShell";
 import { useCurrentLocation } from "@/lib/useCurrentLocation";
 import { useNearbyDrivers } from "@/lib/useNearbyDrivers";
 
+// Generic Bengaluru landmarks, not a saved-places feature — there's no
+// per-user "home"/"work" storage, so these are honest quick-start
+// suggestions rather than a claim to know the rider's own addresses.
+const QUICK_DESTINATIONS = ["MG Road", "Koramangala", "Indiranagar", "Airport"];
+
 export default function RiderHome() {
   const { user } = useUser();
   const { address, loading, coords, refresh: refreshLocation } = useCurrentLocation();
@@ -88,6 +93,26 @@ export default function RiderHome() {
             <MaterialIcons name="mic" size={18} color="#6B7280" />
           </View>
         </Pressable>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-3"
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+        >
+          {QUICK_DESTINATIONS.map((label) => (
+            <Pressable
+              key={label}
+              onPress={() =>
+                router.push({ pathname: "/(rider)/book", params: { dropoff: label } })
+              }
+              className="flex-row items-center gap-1.5 rounded-full border border-divider bg-card px-3 py-1.5 active:opacity-70"
+            >
+              <MaterialIcons name="history" size={14} color="#008744" />
+              <Text className="font-jakarta-semibold text-xs text-ink">{label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         <View className="mx-4 mb-4 flex-row rounded-full border border-divider bg-card p-1">
           {(["map", "list"] as const).map((option) => (

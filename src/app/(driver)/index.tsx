@@ -3,6 +3,7 @@ import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Text, TextInput, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 import { DriverTabBarShell } from "@/components/DriverTabBarShell";
 import { useAcceptRide } from "@/lib/useAcceptRide";
@@ -264,6 +265,39 @@ export default function DriverHome() {
           <Text className="text-center font-jakarta-bold text-xs text-danger">{error}</Text>
         ) : null}
       </View>
+
+      {online && lastFix ? (
+        // Real map, real position — matches the mockup's map-viewport
+        // slot, but this one isn't a static illustration. No fake
+        // "+₹25 surge" style badges: those imply a real earnings bonus
+        // that doesn't exist here, which is the same problem as a
+        // fabricated fare figure. "High demand" alone doesn't promise
+        // money, so it stays honest while still reading as live and busy.
+        <View
+          className="mx-4 mb-3 overflow-hidden rounded-2xl border border-divider"
+          style={{ height: 160 }}
+        >
+          <MapView
+            className="flex-1"
+            region={{
+              latitude: lastFix.lat,
+              longitude: lastFix.lng,
+              latitudeDelta: 0.03,
+              longitudeDelta: 0.03,
+            }}
+          >
+            <Marker
+              coordinate={{ latitude: lastFix.lat, longitude: lastFix.lng }}
+              title="You"
+              pinColor="#FFB800"
+            />
+          </MapView>
+          <View className="absolute left-2 top-2 flex-row items-center gap-1.5 rounded-full bg-card px-2.5 py-1 shadow-sm">
+            <MaterialIcons name="local-fire-department" size={14} color="#D9383A" />
+            <Text className="font-jakarta-bold text-[10px] text-ink">High demand nearby</Text>
+          </View>
+        </View>
+      ) : null}
 
       {hasActiveRide ? (
         // shadow-sm as a plain style here too — this whole card mounts as a

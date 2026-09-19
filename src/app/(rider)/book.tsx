@@ -11,14 +11,18 @@ import { useCurrentLocation } from "@/lib/useCurrentLocation";
 const PLACEHOLDER_FARE = 90;
 
 export default function BookRide() {
-  const { driverId, driverName } = useLocalSearchParams<{
+  const { driverId, driverName, dropoff } = useLocalSearchParams<{
     driverId?: string;
     driverName?: string;
+    dropoff?: string;
   }>();
   const createRide = useCreateRide();
   const { address: pickupAddress, setAddress: setPickupAddress, coords: pickupCoords, loading: locating } =
     useCurrentLocation();
-  const [dropoffAddress, setDropoffAddress] = useState("");
+  // Lazy initializer, not a synced prop — a quick-destination chip sets
+  // this once on navigation; typing afterward shouldn't get overwritten
+  // by the param on every re-render.
+  const [dropoffAddress, setDropoffAddress] = useState(() => dropoff ?? "");
 
   const canSubmit = pickupAddress.trim().length > 0 && dropoffAddress.trim().length > 0;
 
