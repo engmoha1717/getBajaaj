@@ -18,6 +18,7 @@ import * as WebBrowser from "expo-web-browser";
 import { enableFreeze } from "react-native-screens";
 
 import { useCurrentUser } from "@/lib/useCurrentUser";
+import { useRegisterPushToken } from "@/lib/useRegisterPushToken";
 
 // Required once, at module scope, so the in-app browser used for Google/
 // Apple OAuth properly closes and hands control back to the app.
@@ -89,6 +90,8 @@ function RootNavigator() {
   useEffect(() => {
     queryClient.clear();
   }, [userId, queryClient]);
+
+  useRegisterPushToken();
 
   if (!isLoaded || (isSignedIn && roleLoading)) return null;
 

@@ -10,6 +10,7 @@ import { useAcceptRide } from "@/lib/useAcceptRide";
 import { useAvailableRides } from "@/lib/useAvailableRides";
 import { useCompleteRide } from "@/lib/useCompleteRide";
 import { useCurrentDriverRide } from "@/lib/useCurrentDriverRide";
+import { useDriverCancelRide } from "@/lib/useDriverCancelRide";
 import { useDriverOnline } from "@/lib/useDriverOnline";
 import { useMyDriverProfile } from "@/lib/useMyDriverProfile";
 import { useMyRides } from "@/lib/useMyRides";
@@ -60,6 +61,7 @@ export default function DriverHome() {
   const { data: availableRides } = useAvailableRides(isApproved && online && !hasActiveRide);
   const acceptRide = useAcceptRide();
   const completeRide = useCompleteRide();
+  const driverCancelRide = useDriverCancelRide();
   const startRide = useStartRide();
   const [otpInput, setOtpInput] = useState("");
 
@@ -441,6 +443,23 @@ export default function DriverHome() {
               )}
             </Pressable>
           )}
+
+          <Pressable
+            onPress={() => driverCancelRide.mutate(currentRide.id)}
+            disabled={driverCancelRide.isPending}
+            className="items-center py-1 active:opacity-60"
+          >
+            <Text className="font-jakarta-medium text-xs text-muted">
+              {driverCancelRide.isPending ? "Releasing…" : "Can't make it? Release this ride"}
+            </Text>
+          </Pressable>
+          {driverCancelRide.isError ? (
+            <Text className="text-center font-jakarta-medium text-xs text-danger">
+              {driverCancelRide.error instanceof Error
+                ? driverCancelRide.error.message
+                : "Something went wrong."}
+            </Text>
+          ) : null}
         </View>
       ) : online && nextRequest ? (
         <View
