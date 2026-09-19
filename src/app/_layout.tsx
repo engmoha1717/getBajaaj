@@ -17,8 +17,6 @@ import { useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import { enableFreeze } from "react-native-screens";
 
-import { DiagnosticErrorBoundary } from "@/components/DiagnosticErrorBoundary";
-
 // Required once, at module scope, so the in-app browser used for Google/
 // Apple OAuth properly closes and hands control back to the app.
 WebBrowser.maybeCompleteAuthSession();
@@ -58,9 +56,7 @@ export default function RootLayout() {
       tokenCache={tokenCache}
     >
       <QueryClientProvider client={queryClient}>
-        <DiagnosticErrorBoundary>
-          <Stack screenOptions={{ headerShown: false }} />
-        </DiagnosticErrorBoundary>
+        <Stack screenOptions={{ headerShown: false }} />
       </QueryClientProvider>
     </ClerkProvider>
   );

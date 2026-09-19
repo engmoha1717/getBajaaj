@@ -1,8 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/expo";
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { TabBarShell } from "@/components/TabBarShell";
@@ -11,7 +10,17 @@ import { useCurrentLocation } from "@/lib/useCurrentLocation";
 export default function RiderHome() {
   const { user } = useUser();
   const { address, loading } = useCurrentLocation();
-  const [view, setView] = useState<"map" | "list">("map");
+  // Driven by a route param, not useState — every setState-triggered
+  // re-render of this screen crashed with "Couldn't find a navigation
+  // context" on iOS (confirmed not fixable via explicit Stack.Screen,
+  // <Slot> instead of <Tabs>, flattening the nested tabs group,
+  // updating expo-router, or disabling react-native-screens' freeze
+  // optimization — five separate structural fixes, same crash every
+  // time). router.setParams() re-renders this screen through
+  // expo-router's own update path instead of a local setState call,
+  // sidestepping whatever that specific trigger is entirely.
+  const { view: viewParam } = useLocalSearchParams<{ view?: string }>();
+  const view = viewParam === "list" ? "list" : "map";
 
   const initial = (user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? "?")
     .charAt(0)
@@ -62,7 +71,7 @@ export default function RiderHome() {
           {(["map", "list"] as const).map((option) => (
             <Pressable
               key={option}
-              onPress={() => setView(option)}
+              onPress={() => router.setParams({ view: option })}
               className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-full py-2 ${
                 view === option ? "bg-surface shadow-sm" : ""
               }`}
