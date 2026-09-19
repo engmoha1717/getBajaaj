@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-nativ
 
 import { useCreateRide } from "@/lib/useCreateRide";
 import { useCurrentLocation } from "@/lib/useCurrentLocation";
+import { useNearbyDrivers } from "@/lib/useNearbyDrivers";
 
 // Flat placeholder — real fare needs real distance, which needs real
 // dropoff coordinates (see the comment on dropoffLat/dropoffLng below).
@@ -17,12 +18,24 @@ export default function BookRide() {
     dropoff?: string;
   }>();
   const createRide = useCreateRide();
-  const { address: pickupAddress, setAddress: setPickupAddress, coords: pickupCoords, loading: locating } =
-    useCurrentLocation();
+  const {
+    address: pickupAddress,
+    setAddress: setPickupAddress,
+    coords: pickupCoords,
+    loading: locating,
+    refresh: refreshPickup,
+  } = useCurrentLocation();
   // Lazy initializer, not a synced prop — a quick-destination chip sets
   // this once on navigation; typing afterward shouldn't get overwritten
   // by the param on every re-render.
   const [dropoffAddress, setDropoffAddress] = useState(() => dropoff ?? "");
+  const { data: nearbyDrivers } = useNearbyDrivers(pickupCoords);
+
+  function handleSwap() {
+    const nextPickup = dropoffAddress;
+    setDropoffAddress(pickupAddress);
+    setPickupAddress(nextPickup);
+  }
 
   const canSubmit = pickupAddress.trim().length > 0 && dropoffAddress.trim().length > 0;
 
@@ -74,10 +87,28 @@ export default function BookRide() {
             placeholderTextColor="#6B7280"
             className="flex-1 font-jakarta-semibold text-base text-ink"
           />
-          {locating && <ActivityIndicator size="small" color="#121212" />}
+          {locating ? (
+            <ActivityIndicator size="small" color="#121212" />
+          ) : (
+            <Pressable
+              onPress={() => refreshPickup()}
+              className="h-8 w-8 items-center justify-center rounded-full bg-surface active:opacity-70"
+            >
+              <MaterialIcons name="my-location" size={16} color="#008744" />
+            </Pressable>
+          )}
         </View>
 
-        <View className="ml-[4.5px] h-4 border-l border-dashed border-divider" />
+        <View className="flex-row items-center">
+          <View className="ml-[4.5px] h-4 w-4 border-l border-dashed border-divider" />
+          <View className="flex-1" />
+          <Pressable
+            onPress={handleSwap}
+            className="h-7 w-7 items-center justify-center rounded-full bg-surface active:opacity-70"
+          >
+            <MaterialIcons name="swap-vert" size={14} color="#6B7280" />
+          </Pressable>
+        </View>
 
         <View className="h-px bg-divider" />
 
@@ -93,11 +124,21 @@ export default function BookRide() {
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between rounded-2xl border border-divider bg-card px-4 py-3">
-        <Text className="font-jakarta-medium text-sm text-muted">Estimated fare</Text>
-        <Text className="font-jakarta-extrabold text-2xl tracking-tight text-ink">
-          ₹{PLACEHOLDER_FARE}
-        </Text>
+      <View className="gap-2 rounded-2xl border border-divider bg-card px-4 py-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="font-jakarta-medium text-sm text-muted">Estimated fare</Text>
+          <Text className="font-jakarta-extrabold text-2xl tracking-tight text-ink">
+            ₹{PLACEHOLDER_FARE}
+          </Text>
+        </View>
+        {nearbyDrivers?.length ? (
+          <View className="flex-row items-center gap-1.5">
+            <MaterialIcons name="electric-rickshaw" size={14} color="#008744" />
+            <Text className="font-jakarta-medium text-xs text-accent">
+              {nearbyDrivers.length} auto{nearbyDrivers.length === 1 ? "" : "s"} ready near you
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       {createRide.isError && (

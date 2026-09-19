@@ -20,7 +20,14 @@ export type Ride = RideRequestInput & {
   id: string;
   status: "REQUESTED" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   startOtp: string | null;
-  driver: { lastLat: number | null; lastLng: number | null; user: { name: string } } | null;
+  driver: {
+    lastLat: number | null;
+    lastLng: number | null;
+    vehicleMake: string;
+    vehicleModel: string;
+    vehiclePlate: string;
+    user: { name: string; phone: string | null };
+  } | null;
   rating: { score: number } | null;
 };
 
