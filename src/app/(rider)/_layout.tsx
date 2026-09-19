@@ -12,13 +12,19 @@ export default function RiderLayout() {
   if (!isLoaded) return null;
   if (!isSignedIn) return <Redirect href="/" />;
 
-  // Explicit Stack.Screen entries, not the bare auto-discovery form —
-  // Expo's own docs specifically call this out for a Stack that
-  // contains a nested navigator group ((tabs) is itself a <Tabs>, not
-  // a plain screen), which is exactly this case.
+  // Flat structure on purpose: index/activity/wallet/profile are all
+  // direct children here (each renders its own <TabBarShell> around
+  // its content, a plain UI wrapper, not a nested navigator) — an
+  // earlier version nested them under their own (tabs) group/navigator,
+  // which turned out to be the trigger for a "Couldn't find a
+  // navigation context" crash on iOS. book/ride stay full-screen pushes
+  // with no tab bar.
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="activity" />
+      <Stack.Screen name="wallet" />
+      <Stack.Screen name="profile" />
       <Stack.Screen name="book" />
       <Stack.Screen name="ride/[id]" />
     </Stack>

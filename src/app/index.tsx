@@ -76,5 +76,5 @@ function SignedInRouter() {
     return <Redirect href="/(driver)" />;
   }
 
-  return <Redirect href="/(rider)/(tabs)" />;
+  return <Redirect href="/(rider)" />;
 }
