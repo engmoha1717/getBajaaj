@@ -247,30 +247,71 @@ export default function RiderHome() {
         ) : (
           <ScrollView className="mx-4 flex-1" contentContainerStyle={{ gap: 12 }}>
             {drivers.map((driver) => (
-              <Pressable
+              <View
                 key={driver.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(rider)/book",
-                    params: { driverId: driver.id, driverName: driver.name },
-                  })
-                }
-                className="flex-row items-center gap-3 rounded-2xl border border-divider bg-card px-4 py-3 active:opacity-70"
+                className="gap-2 rounded-2xl border border-divider bg-card p-4 shadow-sm"
               >
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-surface">
-                  <MaterialIcons name="electric-rickshaw" size={20} color="#008744" />
+                <View className="flex-row items-start justify-between gap-2">
+                  <View className="flex-1 flex-row items-center gap-3">
+                    <View className="h-11 w-11 items-center justify-center rounded-full bg-primary">
+                      <Text className="font-jakarta-extrabold text-base text-ink">
+                        {driver.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-1.5">
+                        <Text className="font-jakarta-bold text-sm text-ink" numberOfLines={1}>
+                          {driver.name}
+                        </Text>
+                        {driver.averageRating != null ? (
+                          <View className="flex-row items-center gap-0.5 rounded-full bg-surface px-1.5 py-0.5">
+                            <MaterialIcons name="star" size={11} color="#FFB800" />
+                            <Text className="font-jakarta-bold text-[10px] text-ink">
+                              {driver.averageRating.toFixed(1)}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text className="font-jakarta-medium text-xs text-muted" numberOfLines={1}>
+                        {driver.vehicleMake} {driver.vehicleModel}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="items-end">
+                    <View className="rounded bg-primary px-1.5 py-0.5">
+                      <Text className="font-jakarta-extrabold text-[10px] tracking-wider text-ink">
+                        {driver.vehiclePlate}
+                      </Text>
+                    </View>
+                    <Text className="mt-1 font-jakarta-bold text-xs text-muted">
+                      {driver.distanceKm.toFixed(1)} km
+                    </Text>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="font-jakarta-bold text-sm text-ink">{driver.name}</Text>
-                  <Text className="font-jakarta-medium text-xs text-muted">
-                    {driver.vehicleMake} {driver.vehicleModel}
+
+                <View className="flex-row items-center justify-between rounded-xl bg-surface px-3 py-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcons name="payments" size={13} color="#6B7280" />
+                    <Text className="font-jakarta-medium text-[11px] text-muted">UPI / Cash</Text>
+                  </View>
+                  <Text className="font-jakarta-extrabold text-base text-ink">₹90</Text>
+                </View>
+
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(rider)/book",
+                      params: { driverId: driver.id, driverName: driver.name },
+                    })
+                  }
+                  className="h-11 flex-row items-center justify-center gap-1.5 rounded-full bg-ink active:opacity-80"
+                >
+                  <Text className="font-jakarta-bold text-xs uppercase tracking-wide text-white">
+                    Book now
                   </Text>
-                </View>
-                <Text className="font-jakarta-bold text-xs text-muted">
-                  {driver.distanceKm.toFixed(1)} km
-                </Text>
-                <MaterialIcons name="chevron-right" size={20} color="#6B7280" />
-              </Pressable>
+                  <MaterialIcons name="arrow-forward" size={16} color="#FFFFFF" />
+                </Pressable>
+              </View>
             ))}
           </ScrollView>
         )}

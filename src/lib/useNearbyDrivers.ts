@@ -9,6 +9,9 @@ export type NearbyDriver = {
   name: string;
   vehicleMake: string;
   vehicleModel: string;
+  vehiclePlate: string;
+  averageRating: number | null;
+  ratingCount: number;
   distanceKm: number;
   lat: number;
   lng: number;
