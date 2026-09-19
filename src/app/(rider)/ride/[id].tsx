@@ -145,7 +145,7 @@ export default function RideStatus() {
         {isEnRoute && hasDriverLocation ? (
           <View className="h-48 overflow-hidden rounded-2xl border border-divider">
             <MapView
-              className="flex-1"
+              style={{ flex: 1 }}
               region={{
                 latitude: ride.driver!.lastLat!,
                 longitude: ride.driver!.lastLng!,

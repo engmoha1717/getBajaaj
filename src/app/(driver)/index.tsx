@@ -280,7 +280,7 @@ export default function DriverHome() {
           style={{ height: 160 }}
         >
           <MapView
-            className="flex-1"
+            style={{ flex: 1 }}
             region={{
               latitude: lastFix.lat,
               longitude: lastFix.lng,

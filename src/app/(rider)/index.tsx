@@ -164,7 +164,7 @@ export default function RiderHome() {
             <View className="mx-4 flex-1 overflow-hidden rounded-3xl border border-divider">
               <MapView
                 ref={mapRef}
-                className="flex-1"
+                style={{ flex: 1 }}
                 showsUserLocation
                 initialRegion={{
                   latitude: coords.lat,
