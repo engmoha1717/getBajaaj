@@ -299,6 +299,39 @@ export default function DriverHome() {
         </View>
       ) : null}
 
+      {online ? (
+        // Real progress (todayTripCount, already computed above for the
+        // earnings stat), no fake reward money — the mockup's version of
+        // this card promises "+₹250 Extra" for hitting the target, which
+        // would be a fabricated bonus with no incentive system behind it.
+        <View className="mx-4 mb-3 gap-2 rounded-2xl border border-divider bg-card p-4 shadow-sm">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <View
+                className="h-7 w-7 items-center justify-center rounded-lg"
+                style={{ backgroundColor: "rgba(0, 135, 68, 0.15)" }}
+              >
+                <MaterialIcons name="military-tech" size={16} color="#008744" />
+              </View>
+              <Text className="font-jakarta-bold text-sm text-ink">Today's progress</Text>
+            </View>
+            <Text className="font-jakarta-extrabold text-xs text-accent">
+              {Math.min(100, Math.round((todayTripCount / 12) * 100))}%
+            </Text>
+          </View>
+          <View className="h-2 overflow-hidden rounded-full bg-surface">
+            <View
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${Math.min(100, (todayTripCount / 12) * 100)}%` }}
+            />
+          </View>
+          <Text className="font-jakarta-medium text-xs text-muted">
+            {todayTripCount} of 12 rides today
+            {todayTripCount < 12 ? ` — ${12 - todayTripCount} to go` : " — nice work!"}
+          </Text>
+        </View>
+      ) : null}
+
       {hasActiveRide ? (
         // shadow-sm as a plain style here too — this whole card mounts as a
         // fresh subtree on the same online/hasActiveRide state change that
