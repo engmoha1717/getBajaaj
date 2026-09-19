@@ -1,5 +1,6 @@
 import { useAuth, useUser } from "@clerk/expo";
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { TabBarShell } from "@/components/TabBarShell";
@@ -32,6 +33,15 @@ export default function Profile() {
             </Text>
           </View>
         </View>
+
+        <Link
+          href="/(rider)/become-driver"
+          asChild
+        >
+          <Pressable className="h-14 items-center justify-center rounded-full border border-divider bg-card active:opacity-70">
+            <Text className="font-jakarta-bold text-base text-ink">Become a driver</Text>
+          </Pressable>
+        </Link>
 
         <Pressable
           onPress={() => signOut()}

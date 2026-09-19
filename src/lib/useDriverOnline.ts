@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/expo";
 import { useMutation } from "@tanstack/react-query";
 import * as Location from "expo-location";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { apiFetch } from "@/lib/api";
 
@@ -38,6 +38,14 @@ export function useDriverOnline() {
     );
     setOnline(true);
   }, [report]);
+
+  // Stops the GPS watch if this hook's owner unmounts (navigating away,
+  // or getting signed out) while still "online" — without this, the
+  // subscription and its PATCH-per-fix would keep running forever,
+  // driverless, since only goOffline() used to remove it.
+  useEffect(() => {
+    return () => subscriptionRef.current?.remove();
+  }, []);
 
   const goOffline = useCallback(() => {
     subscriptionRef.current?.remove();

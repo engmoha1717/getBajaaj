@@ -1,17 +1,10 @@
-import { useAuth } from "@clerk/expo";
-import { Redirect, Stack } from "expo-router";
+import { Stack } from "expo-router";
 
+// Reachability (signed in + role !== DRIVER) is owned by
+// RootNavigator's Stack.Protected — this layout no longer checks auth
+// itself, which is what used to race that same check on sign-out and
+// crash with "Maximum update depth exceeded".
 export default function RiderLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  // Guards this whole section, not just the sign-out button: any time
-  // Clerk's session goes away (manual sign-out, expired token, etc.)
-  // this layout re-renders and bounces back to "/" immediately — no
-  // refresh needed, because it's watching isSignedIn live, not just
-  // checking it once on mount.
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <Redirect href="/" />;
-
   // Flat structure on purpose: index/activity/wallet/profile are all
   // direct children here (each renders its own <TabBarShell> around
   // its content, a plain UI wrapper, not a nested navigator). Kept this
@@ -27,6 +20,7 @@ export default function RiderLayout() {
       <Stack.Screen name="profile" />
       <Stack.Screen name="book" />
       <Stack.Screen name="ride/[id]" />
+      <Stack.Screen name="become-driver" />
     </Stack>
   );
 }

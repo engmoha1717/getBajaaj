@@ -1,11 +1,7 @@
-import { useAuth } from "@clerk/expo";
-import { Redirect, Stack } from "expo-router";
+import { Stack } from "expo-router";
 
+// Reachability (signed out) is owned by RootNavigator's Stack.Protected
+// — this layout no longer checks auth itself.
 export default function AuthLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-
-  if (!isLoaded) return null;
-  if (isSignedIn) return <Redirect href="/" />;
-
   return <Stack screenOptions={{ headerShown: false }} />;
 }
